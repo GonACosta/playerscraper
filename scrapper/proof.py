@@ -50,8 +50,8 @@ def findTeams(resp):
                 cur=row.find(class_="left").find('a')['href'] 
                 listOfTeams.append(cur) 
           
-    findPlayers()      
-            
+
+
 #finds the players and builds their stats         
 def findPlayers(): 
         teamCounter=0
@@ -81,12 +81,19 @@ def findPlayers():
                     listOfPlayers.insert(teamCounter,auxlist)   
 
                                  
-
+def getDataFromPlayerPage():
+    #TODO
+    pass
+    
+    
     
 #runs the prog
 if __name__ == '__main__':
     soup=setupLink()
     findTeams(soup)
+    findPlayers()
+    getDataFromPlayerPage()      
+
     counter=0
     for i in listOfTeams:
         print("\n")
