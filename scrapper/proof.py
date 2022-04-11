@@ -1,22 +1,21 @@
 import re
+from traceback import print_tb
 import urllib.parse
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 
-from model.player import Player
 
 listOfTeams = []
 listOfPlayers = [[]]
-
+searchFW = True
 #get the response from a url and parse it
 def setupLink(suffix="comps/32/Primeira-Liga-Stats"):
-    
     #set url to fbref + suffix (PT L1 by default)
     url = 'https://fbref.com/en/path' 
     q = urllib.parse.urljoin(url,suffix)
-
+   
     #response from url
     r = requests.get(q)
 
@@ -79,32 +78,38 @@ def findPlayers():
                     auxlist=[] 
                     for row in table4:  
                         cur=row.find(class_="left").find('a')['href'] 
+                        fieldRole = row.find(class_="center").contents
+                        if ("FW" not in fieldRole) & searchFW :
+                            continue
                         auxlist.append(cur)
                     listOfPlayers.insert(teamCounter,auxlist)   
 
                                  
 def getDataFromPlayerPage():
-    for playerSuffix in listOfPlayers:
-        soup=setupLink(playerSuffix)
-        
-        divs=soup.findAll('div')  
-        for div in divs:
-                table=div.find('div',id='all_stats_standard')
-                if table == None:
-                    continue                
-                table1=table.find('div',id='div_stats_standard_11269')
-                table2=table1.find('table',id="stats_standard_11269")
-                table3=table2.find('tbody')
-                table4=table3.findAll('tr')
-                counter+=1
-                listOfPlayers.extend
-                
-                if counter == 1:  
-                    auxlist=[] 
-                    for row in table4:  
-                        cur=row.find(class_="left").find('a')['href'] 
-                        auxlist.append(cur)
-                    listOfPlayers.insert(teamCounter,auxlist)
+    for playerSuffixes in listOfPlayers:
+        for playerSuffix in playerSuffixes:
+            if isinstance(playerSuffix,str)==False:
+                continue
+            soup=setupLink(playerSuffix)
+            
+            divs=soup.findAll('div')  
+            for div in divs:
+                    table=div.find('div',id='all_stats_standard')
+                    if table == None:
+                        continue                
+                    table1=table.find('div',id='div_stats_standard_11269')
+                    table2=table1.find('table',id="stats_standard_11269")
+                    table3=table2.find('tbody')
+                    table4=table3.findAll('tr')
+                    counter+=1
+                    listOfPlayers.extend
+                    
+                    if counter == 1:  
+                        auxlist=[] 
+                        for row in table4:  
+                            cur=row.find(class_="left").find('a')['href'] 
+                            auxlist.append(cur)
+                        listOfPlayers.insert(teamCounter,auxlist)
         
 def savePlayerStats():
      #TODO
@@ -113,6 +118,8 @@ def savePlayerStats():
     
 #runs the prog
 if __name__ == '__main__':
+    print("Are you searching only for forwards?(Y/n)")
+    #TODO: PROCESS TYPE OF FIELDROLE TO SEARCH FOR
     soup=setupLink()
     findTeams(soup)
     findPlayers()
